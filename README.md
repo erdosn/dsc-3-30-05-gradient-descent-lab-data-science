@@ -113,7 +113,7 @@ plt.legend(bbox_to_anchor=(1,1))
 
 
 
-    <matplotlib.legend.Legend at 0x112b01198>
+    <matplotlib.legend.Legend at 0x113beae48>
 
 
 
@@ -129,9 +129,18 @@ Write a function **rss(m)** which calculates the residual sum of squares for a s
 
 ```python
 def rss(m, X=df.budget, y=df.domgross):
-    model = m * X
-    residuals = model - y
-    total_rss = residuals.map(lambda x: x**2).sum()
+    """
+    inputs
+    m - slope, has no default
+    X - budget values, default is df.budget
+    y - actual gross, default is df.gross
+    
+    return 
+    rss of mX and y
+    """
+    y_pred = m * X # predicted budgets
+    residuals = y_pred - y # list of every difference
+    total_rss = sum((y_pred - y)**2)
     return total_rss
 ```
 
@@ -143,16 +152,18 @@ Which of the two models is better?
 #Your code here
 print('Model 1 RSS:', rss(1.575))
 print('Model 2 RSS:', rss(1.331))
+print("Model ? RSS:", rss(-3))
 ```
 
     Model 1 RSS: 2.7614512142376128e+17
     Model 2 RSS: 2.3547212057814554e+17
+    Model ? RSS: 3885160287509532705
 
 
 
 ```python
-#Your response here
-The second model is mildly better.
+# Your response here
+# The second model is mildly better.
 ```
 
 ## Gradient Descent
@@ -173,16 +184,23 @@ To start, lets simply visualize our cost function. Plot the cost function output
 
 ```python
 #Your code here
-x = np.linspace(start=-3, stop=5, num=10**3)
-y = [rss(xi) for xi in x]
-plt.plot(x, y)
+slopes = np.linspace(start=-3, stop=5, num=10**3)
+
+rss_values = []
+for slope in slopes:
+    rss_ = rss(slope)
+    rss_values.append(rss_)
+
+plt.plot(slopes, rss_values)
 plt.title('RSS Loss Function for Various Values of m')
+plt.xlabel("slope value")
+plt.ylabel("RSS(slope)")
 ```
 
 
 
 
-    Text(0.5,1,'RSS Loss Function for Various Values of m')
+    Text(0,0.5,'RSS(slope)')
 
 
 
@@ -195,11 +213,11 @@ As you can see, this is a simple cost function. The minimum is clearly around 1.
 
 ```python
 cur_x = 1.5 # The algorithm starts at x=1.5
-alpha = 1*10**(-7) # step size multiplier
+alpha = 0.0000001 # step size multiplier
 print(alpha)
-precision = 0.0000000001
+precision = 0.00000000001
 previous_step_size = 1 
-max_iters = 10000 # maximum number of iterations
+max_iters = 100000 # maximum number of iterations
 iters = 0 #iteration counter
 
 #Create a loop to iterate through the algorithm until either the max_iteration or precision conditions is met
@@ -211,7 +229,7 @@ while (previous_step_size > precision) & (iters < max_iters):
     #Finally, use the np.gradient() method on this survey region. This code is provided here to ease this portion of the algorithm implementation
     x_survey_region = np.linspace(start = cur_x - previous_step_size , stop = cur_x + previous_step_size , num = 101)
     rss_survey_region = [np.sqrt(rss(m)) for m in x_survey_region]
-    gradient = np.gradient(rss_survey_region)[50] 
+    gradient = np.gradient(rss_survey_region)[50]  # getting the gradient of the cur_x
     cur_x -= alpha * gradient #Move opposite the gradient
     previous_step_size = abs(cur_x - prev_x)
     iters+=1
@@ -221,15 +239,16 @@ print("The local minimum occurs at", cur_x)
 ```
 
     1e-07
-    Current value: 1.5 RSS Produced: 2.6084668957174013e+17
-    Current value: 1.133065571442482 RSS Produced: 2.217773053377031e+17
-    Current value: 1.1131830522748978 RSS Produced: 2.2135715390729418e+17
-    Current value: 1.1124754156940848 RSS Produced: 2.21345414998669e+17
+    Current value: 1.5 RSS Produced: 2.6084668957174006e+17
+    Current value: 1.133065571442482 RSS Produced: 2.2177730533770314e+17
+    Current value: 1.1131830522748978 RSS Produced: 2.2135715390729424e+17
+    Current value: 1.1124754156940848 RSS Produced: 2.2134541499866906e+17
     Current value: 1.1124506992634624 RSS Produced: 2.2134500897406422e+17
     Current value: 1.1124498365366489 RSS Produced: 2.213449948066475e+17
-    Current value: 1.1124498064238728 RSS Produced: 2.2134499431215123e+17
-    Current value: 1.1124498053728105 RSS Produced: 2.213449942948913e+17
-    The local minimum occurs at 1.1124498053361267
+    Current value: 1.1124498064238697 RSS Produced: 2.213449943121512e+17
+    Current value: 1.1124498053728074 RSS Produced: 2.213449942948912e+17
+    Current value: 1.1124498053361207 RSS Produced: 2.2134499429428877e+17
+    The local minimum occurs at 1.1124498053348422
 
 
 ## Plot the minimum on your graph
